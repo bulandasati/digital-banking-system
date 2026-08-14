@@ -1,0 +1,37 @@
+# ====================================================================
+# GITIGNORE — IGNORED FILES & DIRECTORIES
+# ====================================================================
+
+# Environment & Documentation Files Ignored per User Request
+.env.example
+deployment_guide.md
+digital_banking_system_documentation.md
+docker-compose.yml
+schema-init.sql
+README.md
+
+# Compiled Java Build Outputs & Target Directories
+**/target/
+**/*.class
+**/*.jar
+**/*.war
+
+# Node.js & React Build Outputs
+**/node_modules/
+**/dist/
+**/build/
+.npm/
+
+# Logs & Temporary Files
+*.log
+**/logs/
+.tempmediaStorage/
+
+# IDE & Editor Configuration Files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.DS_Store
+Thumbs.db

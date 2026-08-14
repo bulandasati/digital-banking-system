@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: api-gateway
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+  cloud:
+    gateway:
+      routes:
+
+        # Auth Service Routes
+        - id: auth-service
+          uri: ${AUTH_SERVICE_URL:http://localhost:8086}
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+
+        # Account Service Routes
+        - id: account-service
+          uri: ${ACCOUNT_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/v1/accounts/**, /api/v1/admin/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+
+        # Transaction Service Routes
+        - id: transaction-service
+          uri: ${TRANSACTION_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/v1/transactions/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+
+        # Payment Service Routes
+        - id: payment-service
+          uri: ${PAYMENT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/v1/payments/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 5
+                redis-rate-limiter.burstCapacity: 10
+server:
+  port: ${PORT:8080}
+
+jwt:
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
