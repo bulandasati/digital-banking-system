@@ -61,8 +61,9 @@ const Login = () => {
     setLoading(true);
     try {
       const user = await login(emailOrUsername, password);
-      toast.success(`Welcome back, ${user.fullName || user.username}!`);
-      if (user.role === 'ROLE_ADMIN') {
+      const name = user?.fullName || user?.username || 'User';
+      toast.success(`Welcome back, ${name}!`);
+      if (user?.role === 'ROLE_ADMIN') {
         navigate('/admin/dashboard');
       } else {
         navigate('/');
