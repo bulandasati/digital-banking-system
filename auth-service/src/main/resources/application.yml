@@ -29,10 +29,17 @@ spring:
             enable: true
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:sqlserver://localhost:1433;databaseName=auth_db;encrypt=false;trustServerCertificate=true}
+    url: ${SPRING_DATASOURCE_URL:jdbc:sqlserver://localhost:1433;databaseName=auth_db;encrypt=false;trustServerCertificate=true;loginTimeout=60;connectRetryCount=5;connectRetryInterval=10;}
     username: ${SPRING_DATASOURCE_USERNAME:bankuser}
     password: ${SPRING_DATASOURCE_PASSWORD:BankPassword123!}
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 60000
+      validation-timeout: 5000
+      idle-timeout: 300000
+      max-lifetime: 600000
 
   jpa:
     hibernate:
