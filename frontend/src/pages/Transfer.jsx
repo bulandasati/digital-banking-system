@@ -102,9 +102,9 @@ const Transfer = () => {
       const res = await axiosClient.post('/api/v1/transactions/transfer', payload);
       let txData = res.data;
 
-      // Poll up to 4 times (400ms interval) to wait for Kafka fraud-check resolution
-      for (let attempt = 0; attempt < 4; attempt++) {
-        await new Promise((resolve) => setTimeout(resolve, 400));
+      // Poll up to 8 times (500ms interval = up to 4s) to wait for Kafka fraud-check resolution
+      for (let attempt = 0; attempt < 8; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
         try {
           const checkRes = await axiosClient.get(`/api/v1/transactions/${txData.id}`);
           if (checkRes.data) {
@@ -120,19 +120,20 @@ const Transfer = () => {
 
       setReceipt(txData);
 
-      // Check if transaction requires step-up OTP
-      if (txData.status === 'PENDING_VERIFICATION' || txData.status === 'FLAGGED') {
-        setFlaggedReason(txData.failureReason || 'High volume / security risk threshold exceeded');
+      // Check transaction status
+      if (txData.status === 'PENDING_VERIFICATION') {
+        setFlaggedReason(txData.failureReason || 'Security risk verification required');
         setStep(2);
         toast.warning('⚠️ Fraud risk rule triggered! Step-Up OTP Verification Required.');
       } else if (txData.status === 'COMPLETED') {
         setStep(3);
         toast.success('Instant money transfer executed successfully!');
+      } else if (txData.status === 'FLAGGED' || txData.status === 'FAILED') {
+        toast.error(txData.failureReason || 'Transfer could not be processed and funds were refunded.');
+        resetForm();
       } else {
-        // Fallback if status is still processing or pending
-        setFlaggedReason('Security risk verification required');
-        setStep(2);
-        toast.warning('⚠️ Step-Up OTP Verification Required.');
+        toast.info('Transfer initiated and undergoing verification. Please check Passbook shortly.');
+        resetForm();
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Transfer failed');

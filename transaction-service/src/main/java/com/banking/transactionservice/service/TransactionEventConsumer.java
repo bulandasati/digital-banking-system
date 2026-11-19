@@ -63,8 +63,9 @@ public class TransactionEventConsumer {
             String otpKey = "verification:otp" + transactionId;
             redisTemplate.opsForValue().set(otpKey, otp, OTP_EXPIRY_MINUTES, TimeUnit.MINUTES);
 
-            // Update Status
+            // Update Status and reason for UI step-up banner
             transaction.setStatus(TransactionStatus.PENDING_VERIFICATION);
+            transaction.setFailureReason(reason != null ? reason : "Security risk verification required");
             transactionRepository.save(transaction);
 
             log.info("OTP generated for transaction: {} expires in {} min",

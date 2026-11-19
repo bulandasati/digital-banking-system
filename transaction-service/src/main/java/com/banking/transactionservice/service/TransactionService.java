@@ -89,6 +89,9 @@ public class TransactionService {
         kafkaTemplate.send(TRANSACTION_INITIATED_TOPIC, savedTransaction.getId(), event);
         log.info("SAGA STEP 2 - TransactionInitiatedEvent published: {}", savedTransaction.getId());
 
+        // Ensure asynchronous workers are awake and responsive
+        pingWorkersAsync();
+
         return mapToResponse(savedTransaction);
     }
 
@@ -182,18 +185,55 @@ public class TransactionService {
             pendingTxs.addAll(transactionRepository.findByStatus(TransactionStatus.PROCESSING));
 
             for (Transaction tx : pendingTxs) {
-                String otpKey = "verification:otp" + tx.getId();
-                String storedOtp = redisTemplate.opsForValue().get(otpKey);
-                
-                // If Redis TTL key expired or transaction created > 5 minutes ago
-                if (storedOtp == null || (tx.getCreatedAt() != null && tx.getCreatedAt().isBefore(LocalDateTime.now().minusMinutes(5)))) {
-                    log.warn("Auto-expiring abandoned transaction {}: OTP expired in Redis or Kafka outage timeout", tx.getId());
-                    compensateTransaction(tx, "Transaction timeout / expired (5 min threshold) - amount refunded");
+                // Transactions must strictly be older than 5 minutes before being eligible for expiry
+                if (tx.getCreatedAt() != null && tx.getCreatedAt().isBefore(LocalDateTime.now().minusMinutes(5))) {
+                    String otpKey = "verification:otp" + tx.getId();
+                    String storedOtp = redisTemplate.opsForValue().get(otpKey);
+                    
+                    if (storedOtp == null || tx.getStatus() == TransactionStatus.PROCESSING) {
+                        log.warn("Auto-expiring abandoned transaction {}: Exceeded 5 minute timeout without completion", tx.getId());
+                        compensateTransaction(tx, "Transaction timeout / expired (5 min threshold) - amount refunded");
+                    }
                 }
             }
         } catch (Exception e) {
             log.warn("Error in scheduled auto-expire task: {}", e.getMessage());
         }
+    }
+
+    @Scheduled(fixedRate = 480000) // Every 8 minutes to prevent Render Free Tier sleep (15m limit)
+    public void keepAliveWorkers() {
+        pingWorkersAsync();
+    }
+
+    private void pingWorkersAsync() {
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try {
+                java.net.http.HttpClient client = java.net.http.HttpClient.newBuilder()
+                        .connectTimeout(java.time.Duration.ofSeconds(5))
+                        .build();
+
+                client.sendAsync(
+                        java.net.http.HttpRequest.newBuilder()
+                                .uri(java.net.URI.create("https://fraud-detection-service-wzvo.onrender.com/actuator/health"))
+                                .timeout(java.time.Duration.ofSeconds(10))
+                                .GET()
+                                .build(),
+                        java.net.http.HttpResponse.BodyHandlers.discarding()
+                );
+
+                client.sendAsync(
+                        java.net.http.HttpRequest.newBuilder()
+                                .uri(java.net.URI.create("https://notification-service-h0wv.onrender.com/actuator/health"))
+                                .timeout(java.time.Duration.ofSeconds(10))
+                                .GET()
+                                .build(),
+                        java.net.http.HttpResponse.BodyHandlers.discarding()
+                );
+            } catch (Exception e) {
+                log.debug("Worker keepalive ping notice: {}", e.getMessage());
+            }
+        });
     }
 
     private void compensateTransaction(Transaction transaction, String reason) {
