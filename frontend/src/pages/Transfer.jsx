@@ -8,6 +8,7 @@ import PageHeader from '../components/ui/PageHeader';
 import Card from '../components/ui/Card';
 import Select from '../components/ui/Select';
 import Badge from '../components/ui/Badge';
+import { formatDateTime } from '../utils/formatters';
 
 const Transfer = () => {
   const [accounts, setAccounts] = useState([]);
@@ -476,6 +477,11 @@ const Transfer = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
                   <span style={{ color: '#94A3B8' }}>Status:</span>
                   <Badge status={receipt.status}>{receipt.status}</Badge>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                  <span style={{ color: '#94A3B8' }}>Timestamp:</span>
+                  <span style={{ color: '#F8FAFC' }}>{formatDateTime(receipt.completedAt || receipt.createdAt)}</span>
                 </div>
               </div>
 

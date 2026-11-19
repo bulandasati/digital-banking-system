@@ -235,8 +235,8 @@ public class NotificationService {
     }
 
     private String buildHtmlEmailTemplate(String subject, String message, String accountRef) {
-        String now = java.time.LocalDateTime.now()
-                .format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a"));
+        String now = java.time.ZonedDateTime.now(java.time.ZoneId.of("Asia/Kolkata"))
+                .format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a 'IST'"));
         
         String badgeColor = "#2563eb"; // default blue
         String displayStatus = "COMPLETED";

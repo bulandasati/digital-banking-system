@@ -10,6 +10,7 @@ import PageHeader from '../components/ui/PageHeader';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import DataTable from '../components/ui/DataTable';
+import { formatDateTime, formatDateOnly } from '../utils/formatters';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -84,7 +85,7 @@ const Dashboard = () => {
     }
 
     const txDate = tx.createdAt
-      ? new Date(tx.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      ? formatDateOnly(tx.createdAt)
       : `Tx #${idx + 1}`;
 
     chartData.push({
@@ -131,7 +132,7 @@ const Dashboard = () => {
       accessorKey: 'createdAt',
       cell: (tx) => (
         <span style={{ color: '#CBD5E1', fontSize: '12px' }}>
-          {tx.createdAt ? new Date(tx.createdAt).toLocaleString('en-IN') : 'Recent'}
+          {formatDateTime(tx.createdAt)}
         </span>
       )
     },

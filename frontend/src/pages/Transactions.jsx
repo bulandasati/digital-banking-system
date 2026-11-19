@@ -11,6 +11,7 @@ import Select from '../components/ui/Select';
 import Badge from '../components/ui/Badge';
 import Modal from '../components/ui/Modal';
 import DataTable from '../components/ui/DataTable';
+import { formatDateTime } from '../utils/formatters';
 
 const Transactions = () => {
   const [accounts, setAccounts] = useState([]);
@@ -115,7 +116,7 @@ const Transactions = () => {
       accessorKey: 'createdAt',
       cell: (tx) => (
         <span style={{ color: '#CBD5E1', fontSize: '12px' }}>
-          {tx.createdAt ? new Date(tx.createdAt).toLocaleString('en-IN') : 'Recent'}
+          {formatDateTime(tx.createdAt)}
         </span>
       )
     },
@@ -299,7 +300,7 @@ const Transactions = () => {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>Timestamp:</span>
-              <span>{selectedTxDetail.createdAt ? new Date(selectedTxDetail.createdAt).toLocaleString('en-IN') : 'N/A'}</span>
+              <span>{formatDateTime(selectedTxDetail.createdAt)}</span>
             </div>
           </div>
         )}

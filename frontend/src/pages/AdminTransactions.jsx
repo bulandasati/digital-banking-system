@@ -10,6 +10,7 @@ import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import Badge from '../components/ui/Badge';
 import DataTable from '../components/ui/DataTable';
+import { formatDateTime } from '../utils/formatters';
 
 const AdminTransactions = () => {
   const [transactions, setTransactions] = useState([]);
@@ -88,7 +89,7 @@ const AdminTransactions = () => {
       accessorKey: 'createdAt',
       cell: (tx) => (
         <span style={{ color: '#CBD5E1', fontSize: '12px' }}>
-          {tx.createdAt ? new Date(tx.createdAt).toLocaleString('en-IN') : 'Recent'}
+          {formatDateTime(tx.createdAt)}
         </span>
       )
     },

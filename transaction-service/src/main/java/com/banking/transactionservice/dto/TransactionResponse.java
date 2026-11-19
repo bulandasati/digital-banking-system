@@ -22,6 +22,8 @@ public class TransactionResponse {
     private String description;
     private String referenceNumber;
     private String failureReason;
+    @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
     private LocalDateTime createdAt;
+    @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
     private LocalDateTime completedAt;
 }
