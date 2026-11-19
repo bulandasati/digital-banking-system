@@ -9,6 +9,9 @@ digital_banking_system_documentation.md
 docker-compose.yml
 schema-init.sql
 README.md
+RENDER_DEPLOYMENT_ENV.md
+PROJECT_MASTER_REFERENCE.md
+INTERVIEW_PREPARATION.md
 
 # Compiled Java Build Outputs & Target Directories
 **/target/
