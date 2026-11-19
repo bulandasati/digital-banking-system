@@ -19,7 +19,7 @@ public class NotificationService {
     @Autowired(required = false)
     private JavaMailSender mailSender;
 
-    @Value("${spring.mail.username:}")
+    @Value("${spring.mail.from:bulandasati06@gmail.com}")
     private String fromEmail;
 
     @KafkaListener(topics = "transaction.completed")

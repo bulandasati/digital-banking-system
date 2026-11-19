@@ -6,6 +6,7 @@ spring:
     port: ${SPRING_MAIL_PORT:587}
     username: ${SPRING_MAIL_USERNAME:bulandasati06@gmail.com}
     password: ${SPRING_MAIL_PASSWORD:orwtggpnrybtejye}
+    from: ${SPRING_MAIL_FROM:bulandasati06@gmail.com}
     properties:
       mail:
         smtp:
@@ -39,6 +40,9 @@ server:
   port: ${PORT:8085}
 
 management:
+  health:
+    mail:
+      enabled: false
   endpoints:
     web:
       exposure:
