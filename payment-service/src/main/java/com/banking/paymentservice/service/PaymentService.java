@@ -131,6 +131,12 @@ public class PaymentService {
         Payment payment = paymentRepository.findByRazorpayOrderId(orderId)
                 .orElseThrow(() -> new RuntimeException("Payment not found for order: " + orderId));
 
+        // Idempotency: skip if already processed by client callback or previous webhook
+        if (payment.getStatus() == PaymentStatus.COMPLETED) {
+            log.info("Payment for order {} is already COMPLETED. Skipping duplicate event emission.", orderId);
+            return;
+        }
+
         payment.setRazorpayPaymentId(paymentId);
         payment.setStatus(PaymentStatus.COMPLETED);
         Payment saved = paymentRepository.save(payment);
@@ -152,6 +158,11 @@ public class PaymentService {
         log.warn("Processing payment failure for order: {} reason: {}", orderId, reason);
         Payment payment = paymentRepository.findByRazorpayOrderId(orderId)
                 .orElseThrow(() -> new RuntimeException("Payment not found for order: " + orderId));
+
+        if (payment.getStatus() == PaymentStatus.COMPLETED || payment.getStatus() == PaymentStatus.FAILED) {
+            log.info("Payment for order {} already finalized ({}). Skipping duplicate failure event.", orderId, payment.getStatus());
+            return;
+        }
 
         payment.setStatus(PaymentStatus.FAILED);
         payment.setFailureReason(reason);
